@@ -14,17 +14,17 @@ enum graphType {
 class TspSolver{
     private :
         int n;
-        vector<pair<float,float>> cities ;
-        vector<vector<float>> graph;
+        vector<pair<double,double>> cities ;
+        vector<vector<double>> graph;
         graphType type;
-        pair<vector<int>,float> bestTour;
+        pair<vector<int>,double> bestTour;
 
 
     public :
         void solve_tsp();
         friend istream &operator>>(istream &, TspSolver &);
         void print_tour();
-        float calculate_distance(vector<int>);
+        double calculate_distance(vector<int>);
 
     
 };
