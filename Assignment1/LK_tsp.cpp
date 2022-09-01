@@ -203,7 +203,7 @@ bool LK_TSP::remove_next_edge(int start,int last,double gain,map<int,unordered_s
                 best_tour=new_tour.second.first;
                 best_tour_edges=new_tour.second.second;
                // if(num_broken>1)cout<<"sfdasf "<<best_improvement<<"  "<<num_broken+1<<endl<<"llll ";
-                print_tour(best_tour);
+                //print_tour(best_tour);
                 already_found= already_found | true;
             }
 		
@@ -232,21 +232,10 @@ LK_TSP::LK_TSP(vector<vector<double>> edges)
 {
     this->edges=edges;
     this->n=edges[0].size();
-    this->tour=create_random_tour();
     
-    unordered_set<int> temp;
-    for(int i=0;i<n;i++)
-    {
-        tour_edges[i]=temp;
-    }
-    for(int i=0;i<n;i++)
-    {  
-        this->tour_edges[tour[i]].insert(tour[(i+1)%n]);
-        this->tour_edges[tour[(i+1)%n]].insert(tour[i]);
-    }
-    tour_distance=calculate_distance(tour);
     
 }
+
 
 vector<int> LK_TSP::create_random_tour(){
     vector<int> tour;
@@ -265,7 +254,21 @@ vector<int> LK_TSP::create_random_tour(){
 
 void LK_TSP::run_lin_kerninghan()
 {
+    this->tour=create_random_tour();
+    
+    unordered_set<int> temp;
+    for(int i=0;i<n;i++)
+    {
+        this->tour_edges[i]=temp;
+    }
+    for(int i=0;i<n;i++)
+    {  
+        this->tour_edges[tour[i]].insert(tour[(i+1)%n]);
+        this->tour_edges[tour[(i+1)%n]].insert(tour[i]);
+    }
+    this->tour_distance=calculate_distance(tour);
     current_seen.clear();
+
     vector<int> perm = create_random_tour();
     bool improved = true;
     while(improved){
@@ -293,6 +296,7 @@ void LK_TSP::run_lin_kerninghan()
         already_seen.insert(seen_tour.first);
         already_seen.insert(seen_tour.second);
     }
+    //cout<<"size "<<already_seen.size()<<endl;
 }
 
 
@@ -312,7 +316,7 @@ bool LK_TSP::improve_tour(int t1, int t2,int t3)
     broken[t2].insert(t1);
     
     if(remove_next_edge(t1,t3,edges[t1][t2]-edges[t2][t3],joined,broken,1,1,false))
-    {
+    {	
         pair<string,string> current_tour=tour_to_string(best_tour);
         if(current_seen.find(current_tour.first)!=current_seen.end())
             return false;
@@ -320,6 +324,12 @@ bool LK_TSP::improve_tour(int t1, int t2,int t3)
         current_seen.insert(current_tour.first);
         current_seen.insert(current_tour.second);
         
+        //if(already_seen.find(current_tour.first)==already_seen.end())
+    	//{
+        //	already_seen.insert(current_tour.first);
+        //	already_seen.insert(current_tour.second);
+    	//}
+    	//else return false;
     	//cout<<"ass "<<best_improvement<<endl;
     	if(tour_distance<=calculate_distance(best_tour)){return false;}
         tour=best_tour;
