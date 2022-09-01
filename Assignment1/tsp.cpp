@@ -19,7 +19,6 @@ istream &operator>>(istream & in, TspSolver & T)
     in>>T.n;
 
     for(int i=0;i<T.n;i++) {
-        double a;cin>>a;
         double x, y;
         cin>>x>>y;
         T.cities.push_back(make_pair(x,y));
@@ -28,44 +27,49 @@ istream &operator>>(istream & in, TspSolver & T)
     for(int i=0;i<T.n;i++)
     {
         vector<double> row;
-        for(int j=0;j<i;j++)
+        for(int j=0;j<T.n;j++)
         {
-        	row.push_back(T.graph[j][i]);
-        }
-        for(int j=i;j<T.n;j++)
-        {
-            double distance=sqrt(pow(T.cities[i].first-T.cities[j].first,2)+pow(T.cities[i].second-T.cities[j].second,2)); //cin>>distance;
-            row.push_back(distance);cout<<distance<<" ";
+            double distance; cin>>distance;
+            row.push_back(distance);
         }
         T.graph.push_back(row);
         cout<<endl;
     }
-    cout<<T.graph[53][3]<<endl;
-    cout<<T.graph[3][53]<<endl;
-        cout<<T.graph[24][38]<<endl;
-        cout<<T.graph[38][24]<<endl;
-        cout<<T.graph[53][54]<<endl;
-        cout<<T.graph[54][53]<<endl;
-        cout<<T.graph[3][38]<<endl;
-        cout<<T.graph[38][3]<<endl;
     
+    vector<int> random_tour;
+    for(int i=0;i<T.n;i++) {
+        random_tour.push_back(i);
+    }
+
+    for(int i=T.n-1;i>=0;i--) {
+        int j=rand()%(i+1);
+        int temp=random_tour[i];
+        random_tour[i]=random_tour[j];
+        random_tour[j]=temp;
+    }
+    T.bestTour=make_pair(random_tour,T.calculate_distance(random_tour));
+
     return in;
 }
  
 void TspSolver::solve_tsp(){
-    LK_TSP LK_runner(graph);
-    LK_runner.run_lin_kerninghan();
-    bestTour=make_pair(LK_runner.tour,calculate_distance(LK_runner.tour));
 
-    print_tour();
     
-    vector<int> tour(n);
-    for(int i=0;i<n;i++){cin>>tour[i];tour[i]--;}
-    cout<<"optimal "<<calculate_distance(tour);
- 
+    LK_TSP LK_runner(graph);
+    int num=20;  
+    for(int i=0;i<20;i++)
+    {    
+        LK_runner.run_lin_kerninghan();
+        if(calculate_distance(LK_runner.tour)<bestTour.second)
+        {
+            bestTour=make_pair(LK_runner.tour,calculate_distance(LK_runner.tour));
+            print_best_tour();        
+        }
+    }    
+
 }
 
-void TspSolver::print_tour()
+void TspSolver::print_best_tour()
 {
     for(int i=0;i<n;i++)
     {

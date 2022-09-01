@@ -3,6 +3,7 @@
 #include<unordered_set>
 #include<utility>
 #include<map>
+#include<string>
 #include<algorithm>
 
 #ifndef LK
@@ -19,8 +20,10 @@ class LK_TSP{
         double best_improvement;
         vector<int> best_tour;
         map<int,unordered_set<int>> best_tour_edges;
+        unordered_set<string> already_seen;
+        unordered_set<string> current_seen;
 
-        vector<int> create_random_tour();    
+        
         void calculate_inverse_tour();
         void print_tour(vector<int>);
         bool nextXavailable(int,int,map<int,unordered_set<int>>,map<int,unordered_set<int>>);
@@ -34,9 +37,11 @@ class LK_TSP{
         int get_prev_node(int);
         int get_next_node(int);
         pair<bool,pair<vector<int>,map<int,unordered_set<int>>>> is_new_tour_valid(map<int,unordered_set<int>> &, map<int,unordered_set<int>> &);
-    
+        void add_already_seen_tour();
+        pair<string,string> tour_to_string(vector<int> &);
     public :
         vector<int> tour;
+        vector<int> create_random_tour();    
         LK_TSP(vector<vector<double>>);
         void run_lin_kerninghan();
         

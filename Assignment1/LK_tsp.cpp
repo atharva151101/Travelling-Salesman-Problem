@@ -245,6 +245,7 @@ LK_TSP::LK_TSP(vector<vector<double>> edges)
         this->tour_edges[tour[(i+1)%n]].insert(tour[i]);
     }
     tour_distance=calculate_distance(tour);
+    
 }
 
 vector<int> LK_TSP::create_random_tour(){
@@ -264,6 +265,7 @@ vector<int> LK_TSP::create_random_tour(){
 
 void LK_TSP::run_lin_kerninghan()
 {
+    current_seen.clear();
     vector<int> perm = create_random_tour();
     bool improved = true;
     while(improved){
@@ -272,10 +274,24 @@ void LK_TSP::run_lin_kerninghan()
         {
             calculate_inverse_tour();
             best_improvement=0;
-            improved = improved | improve_tour(perm[i]);
-            print_tour(tour);
-            cout<<calculate_distance(tour)<<endl<<endl;
+            bool is_improved=improve_tour(perm[i]);
+            
+            if(!is_improved)
+            {
+                if(already_seen.find(tour_to_string(tour).first)!=already_seen.end())
+                {
+                    break;
+                }
+            }
+
+            improved = improved | is_improved;
         }
+    }
+    pair<string,string> seen_tour=tour_to_string(tour);
+    if(already_seen.find(seen_tour.first)==already_seen.end())
+    {
+        already_seen.insert(seen_tour.first);
+        already_seen.insert(seen_tour.second);
     }
 }
 
@@ -297,6 +313,13 @@ bool LK_TSP::improve_tour(int t1, int t2,int t3)
     
     if(remove_next_edge(t1,t3,edges[t1][t2]-edges[t2][t3],joined,broken,1,1,false))
     {
+        pair<string,string> current_tour=tour_to_string(best_tour);
+        if(current_seen.find(current_tour.first)!=current_seen.end())
+            return false;
+                    
+        current_seen.insert(current_tour.first);
+        current_seen.insert(current_tour.second);
+        
     	//cout<<"ass "<<best_improvement<<endl;
     	if(tour_distance<=calculate_distance(best_tour)){return false;}
         tour=best_tour;
@@ -357,4 +380,21 @@ int LK_TSP::get_next_node(int node)
 {
     int idx=inverse_tour[node];
     return tour[(idx+1+n)%n];
+}
+
+pair<string,string> LK_TSP::tour_to_string(vector<int> & tour)
+{
+    int ind=0;
+    while( ind<tour.size() && tour[ind]!=0 )ind++;
+
+    string str1,str2;
+    for(int i=0;i<tour.size();i++)
+    {
+        str1+=to_string(tour[(ind+i)%tour.size()]);
+        str1+="-";
+        str2+=to_string(tour[(ind+i)%tour.size()]);
+        str2+="-";
+    }
+
+    return make_pair(str1,str2);
 }

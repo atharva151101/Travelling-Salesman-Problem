@@ -23,7 +23,7 @@ class TspSolver{
     public :
         void solve_tsp();
         friend istream &operator>>(istream &, TspSolver &);
-        void print_tour();
+        void print_best_tour();
         double calculate_distance(vector<int>);
 
     
