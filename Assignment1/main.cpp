@@ -12,8 +12,8 @@ int main()
     TspSolver Tsp;
     cin>>Tsp;
 
-    //Tsp.solve_tsp();
-    Tsp.solve_tsp_sa();
+    Tsp.solve_tsp();
+    //Tsp.solve_tsp_sa();
 
     return 0;
 }

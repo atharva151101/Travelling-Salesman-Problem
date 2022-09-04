@@ -370,7 +370,7 @@ bool LK_TSP::improve_tour(int t1, int t2,int t3)
         tour=best_tour;
         tour_edges=best_tour_edges;
         tour_distance=calculate_distance(best_tour);
-        //cout<<"inside ";print_tour(tour);
+        cout<<"inside ";print_tour(tour);
         //cout<<"size "<<current_seen.size()<<endl;
         return true;
     }
