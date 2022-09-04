@@ -22,6 +22,7 @@ class TspSolver{
 
     public :
         void solve_tsp();
+        void solve_tsp_sa();
         friend istream &operator>>(istream &, TspSolver &);
         void print_best_tour();
         double calculate_distance(vector<int>);

@@ -1,2 +1,2 @@
-tsp: main.cpp tsp.cpp LK_tsp.cpp
-	g++ -o tsp main.cpp tsp.cpp LK_tsp.cpp 
+tsp: main.cpp tsp.cpp LK_tsp.cpp TSP_SA.cpp
+	g++ -o tsp main.cpp tsp.cpp LK_tsp.cpp TSP_SA.cpp
