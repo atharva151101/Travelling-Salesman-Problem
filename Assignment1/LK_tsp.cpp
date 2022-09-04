@@ -18,7 +18,15 @@ void LK_TSP::print_tour(vector<int> tour)
         cout<<tour[i]<<" ";
     }
     cout<<endl;
+    
+    cout<<tour_distance<<endl;
 }
+
+bool comp2(pair<pair<int,double>,double> a, pair<pair<int,double>,double> b)
+{
+    return a.second<b.second;        
+}
+
 
 bool comp(pair<int,double> a, pair<int,double> b)
 {
@@ -83,12 +91,13 @@ pair<bool,pair<vector<int>,map<int,unordered_set<int>>>> LK_TSP::is_new_tour_val
 
 }
 
-bool LK_TSP::nextXavailable(int start, int last,map<int,unordered_set<int>> joined, map<int,unordered_set<int>>broken)
+pair<bool,double> LK_TSP::nextXavailable(int start, int last,map<int,unordered_set<int>> joined, map<int,unordered_set<int>>broken)
 {
     vector<int> options;
     options.push_back(get_prev_node(last));
     options.push_back(get_next_node(last));
     bool ans=false;
+    double maxX = max(edges[last][options[0]],edges[last][options[1]]);
     for(int i=0;i<options.size();i++)
     {
         int next=options[i];
@@ -105,30 +114,43 @@ bool LK_TSP::nextXavailable(int start, int last,map<int,unordered_set<int>> join
             pair<bool,pair<vector<int>,map<int,unordered_set<int>>>> new_tour=is_new_tour_valid(joined_new,broken_new);
             
             ans=ans | new_tour.first;
+
             //if(new_tour.first)cout<<"avalX "<<last<<" "<<next<<endl;
         }
    }
-   return ans;         
+   return make_pair(ans,maxX);         
 }
-vector<pair<int,int>> LK_TSP::possibleYchoices(int start, int last,double gain, map<int,unordered_set<int>> joined, map<int,unordered_set<int>> broken)
+vector<pair<pair<int,double>,double>> LK_TSP::possibleYchoices(int start, int last,double gain, map<int,unordered_set<int>> joined, map<int,unordered_set<int>> broken)
 {
-    vector<pair<int,int>> choices;
+    vector<pair<pair<int,double>,double>> choices;
+    
+    vector<pair<int,double>> Yorder;
     for(int i=0;i<n;i++)
     {
-        if(i!=last && joined[last].find(i)==joined[last].end() && broken[last].find(i)==broken[last].end() && 
-           tour_edges[last].find(i)==tour_edges[last].end() )
+    	Yorder.push_back(make_pair(i,edges[last][i]));
+    }
+    sort(Yorder.begin(),Yorder.end(),comp);
+    int cnt=0;
+    for(int i=0;i<n && cnt<5;i++)
+    {
+        if(Yorder[i].first!=last && joined[last].find(Yorder[i].first)==joined[last].end() && broken[last].find(Yorder[i].first)==broken[last].end() && 
+           tour_edges[last].find(Yorder[i].first)==tour_edges[last].end() )
         {
             
-            if(gain>=edges[last][i]){
+            if(gain>=edges[last][Yorder[i].first]){
              map<int,unordered_set<int>> joined_new=joined;
             map<int,unordered_set<int>> broken_new=broken;
-            joined_new[last].insert(i);
-            joined_new[i].insert(last);
-                if(nextXavailable(start,i,joined_new,broken_new))choices.push_back(make_pair(i,edges[last][i]));
+            joined_new[last].insert(Yorder[i].first);
+            joined_new[Yorder[i].first].insert(last);
+            pair<bool,double> nextX = nextXavailable(start,Yorder[i].first,joined_new,broken_new);
+            if(nextX.first){
+            	choices.push_back(make_pair(Yorder[i],edges[last][i]-nextX.second));
+            	cnt++;
+            	}
             }
         }
     }
-    sort(choices.begin(),choices.end(),comp);
+    sort(choices.begin(),choices.end(),comp2);
     //cout<<"zzzz "<<choices.size()<<endl;
     return choices;
 }
@@ -136,23 +158,28 @@ vector<pair<int,int>> LK_TSP::possibleYchoices(int start, int last,double gain, 
 bool LK_TSP::add_next_edge(int start,int last,double gain,map<int,unordered_set<int>> joined, map<int,unordered_set<int>> broken,int num_joined,int num_broken,bool already_found)
 {
     //if(num_broken>2 || num_joined>2)cout<<"hurrayyy  "<<num_broken<<" "<<num_joined<<endl;
-    vector<pair<int,int>> choices = possibleYchoices(start,last,gain,joined,broken);
+    vector<pair<pair<int,double>,double>> choices = possibleYchoices(start,last,gain,joined,broken);
 
     if(choices.size()==0) {return false | already_found;}
 
-    if(num_broken==2 && !already_found)
+    if(num_broken==2)
     {
-        for(int i=0;i<choices.size();i++)
+        for(int i=0;i<choices.size() && i<5;i++)
         {
              map<int,unordered_set<int>> joined_new=joined;
              map<int,unordered_set<int>> broken_new=broken;
-             joined_new[last].insert(choices[i].first);
-             joined_new[choices[i].first].insert(last);
+             joined_new[last].insert(choices[i].first.first);
+             joined_new[choices[i].first.first].insert(last);
              
-             double Gi=gain-choices[i].second; 
-             bool canChooseX=remove_next_edge(start,choices[0].first,Gi,joined_new,broken,num_joined+1,num_broken,already_found);
+             double Gi=gain-edges[last][choices[i].first.first];
+             if(Gi<=best_improvement)
+              	continue; 
+             bool canChooseX=remove_next_edge(start,choices[i].first.first,Gi,joined_new,broken,num_joined+1,num_broken,already_found);
              if(canChooseX)
                 return true;
+             if(already_found)
+             	return true;
+                
         }
         return false | already_found;
     }
@@ -160,12 +187,12 @@ bool LK_TSP::add_next_edge(int start,int last,double gain,map<int,unordered_set<
     {
         map<int,unordered_set<int>> joined_new=joined;
         map<int,unordered_set<int>> broken_new=broken;
-        joined_new[last].insert(choices[0].first);
-        joined_new[choices[0].first].insert(last);
-        double Gi=gain-choices[0].second;
+        joined_new[last].insert(choices[0].first.first);
+        joined_new[choices[0].first.first].insert(last);
+        double Gi=gain-edges[last][choices[0].first.first];
         if(Gi<=best_improvement)
               return false | already_found;
-        return remove_next_edge(start,choices[0].first,gain-choices[0].second,joined_new,broken,num_joined+1,num_broken,already_found);
+        return remove_next_edge(start,choices[0].first.first,Gi,joined_new,broken,num_joined+1,num_broken,already_found);
         
     }
 
@@ -176,8 +203,16 @@ bool LK_TSP::remove_next_edge(int start,int last,double gain,map<int,unordered_s
 {
     //if(num_broken>2 || num_joined>1)cout<<"hurrayyy  "<<num_broken<<" "<<num_joined<<endl;
     vector<int> options;
-    options.push_back(get_prev_node(last));
-    options.push_back(get_next_node(last));
+    if(edges[last][get_prev_node(last)]>get_next_node(last))
+    {	
+    	options.push_back(get_prev_node(last));
+    	options.push_back(get_next_node(last));
+    }
+    else
+    {
+    	options.push_back(get_next_node(last));
+    	options.push_back(get_prev_node(last));
+    }
     
     for(int i=0;i<options.size();i++)
     {
@@ -335,6 +370,8 @@ bool LK_TSP::improve_tour(int t1, int t2,int t3)
         tour=best_tour;
         tour_edges=best_tour_edges;
         tour_distance=calculate_distance(best_tour);
+        //cout<<"inside ";print_tour(tour);
+        //cout<<"size "<<current_seen.size()<<endl;
         return true;
     }
     return false;
@@ -347,12 +384,14 @@ bool LK_TSP::improve_tour(int t1, int t2)
     {
         if(tour_edges[t2].find(i)==tour_edges[t2].end() && tour_edges[t1].find(i)==tour_edges[t1].end() && edges[t1][t2]-edges[t2][i]>0)
         {
-            t3s.push_back(make_pair(i,edges[t2][i]));
+            t3s.push_back(make_pair(i,edges[t2][i]-max(edges[i][get_prev_node(i)],edges[i][get_next_node(i)])));
         }
     }
     
     sort(t3s.begin(),t3s.end(),comp);
-    for(int i=0;i<t3s.size() ;i++)
+    
+    
+    for(int i=0;i<t3s.size() && i<5 ;i++)
     {
         if(improve_tour(t1,t2,t3s[i].first))
             return true;

@@ -26,14 +26,14 @@ class LK_TSP{
         
         void calculate_inverse_tour();
         void print_tour(vector<int>);
-        bool nextXavailable(int,int,map<int,unordered_set<int>>,map<int,unordered_set<int>>);
+        pair<bool,double> nextXavailable(int,int,map<int,unordered_set<int>>,map<int,unordered_set<int>>);
         double calculate_distance(vector<int>);
         bool improve_tour(int);
         bool improve_tour(int, int);
         bool improve_tour(int,int,int);
         bool remove_next_edge(int,int,double, map<int,unordered_set<int>>, map<int,unordered_set<int>>,int, int,bool);
         bool add_next_edge(int,int,double,map<int,unordered_set<int>>, map<int,unordered_set<int>>,int,int,bool);
-        vector<pair<int,int>> possibleYchoices(int,int ,double ,map<int,unordered_set<int>>, map<int,unordered_set<int>>);
+        vector<pair<pair<int,double>,double>> possibleYchoices(int,int ,double ,map<int,unordered_set<int>>, map<int,unordered_set<int>>);
         int get_prev_node(int);
         int get_next_node(int);
         pair<bool,pair<vector<int>,map<int,unordered_set<int>>>> is_new_tour_valid(map<int,unordered_set<int>> &, map<int,unordered_set<int>> &);

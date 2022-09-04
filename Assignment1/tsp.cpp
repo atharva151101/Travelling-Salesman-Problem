@@ -89,13 +89,14 @@ void TspSolver::solve_tsp_sa(){
 
 void TspSolver::print_best_tour()
 {
+cout<<"outside "; 
     for(int i=0;i<n;i++)
     {
         cout<<bestTour.first[i]<<" ";
     }
     cout<<endl;
 
-    //cout<<bestTour.second<<endl;
+    cout<<bestTour.second<<endl;
 }
 
 
