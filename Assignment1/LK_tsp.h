@@ -14,6 +14,7 @@ class LK_TSP{
     private:
         int n;
         double tour_distance;
+        double best_printed_tour;
         vector<vector<double>> edges;
         vector<int> inverse_tour;
         map<int,unordered_set<int>> tour_edges;

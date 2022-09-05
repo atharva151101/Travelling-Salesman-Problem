@@ -1,4 +1,5 @@
 #include"TSP_SA.h"
+#include<ctime>
 #include <iostream>
 #include <cstdlib>
 #include <cmath>

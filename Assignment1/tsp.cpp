@@ -72,7 +72,7 @@ void TspSolver::solve_tsp(){
         if(calculate_distance(LK_runner.tour)<bestTour.second)
         {
             bestTour=make_pair(LK_runner.tour,calculate_distance(LK_runner.tour));
-            print_best_tour();        
+            //print_best_tour();        
         }
     }    
 

@@ -19,7 +19,7 @@ void LK_TSP::print_tour(vector<int> tour)
     }
     cout<<endl;
     
-    cout<<tour_distance<<endl;
+    cout<<calculate_distance(tour)<<endl;
 }
 
 bool comp2(pair<pair<int,double>,double> a, pair<pair<int,double>,double> b)
@@ -268,7 +268,10 @@ LK_TSP::LK_TSP(vector<vector<double>> edges)
     this->edges=edges;
     this->n=edges[0].size();
     
-    
+    vector<int> initialise_tour=create_random_tour();
+    print_tour(initialise_tour);
+    best_printed_tour=calculate_distance(initialise_tour);
+
 }
 
 
@@ -370,7 +373,11 @@ bool LK_TSP::improve_tour(int t1, int t2,int t3)
         tour=best_tour;
         tour_edges=best_tour_edges;
         tour_distance=calculate_distance(best_tour);
-        cout<<"inside ";print_tour(tour);
+        if(best_printed_tour> tour_distance)
+        {    
+            print_tour(tour);
+            best_printed_tour=tour_distance;
+        }    
         //cout<<"size "<<current_seen.size()<<endl;
         return true;
     }
