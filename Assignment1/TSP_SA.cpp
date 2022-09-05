@@ -3,8 +3,8 @@
 #include <cstdlib>
 #include <cmath>
 #include <limits>
-#define INITIAL_T 999999999999999
-#define T_UPDATE_FACTOR 0.999
+#define Temperature_update_factor 0.999
+#define Initial_Temperature 999999999999999
 using namespace	std;
 
 TSP_SA::TSP_SA(vector<vector<double>> edge)
@@ -13,7 +13,7 @@ TSP_SA::TSP_SA(vector<vector<double>> edge)
 
 			this->n = edge.size();
 			this->edge = edge;
-			T = INITIAL_T;
+			T = Initial_Temperature;
 			
 			//Initialisations of path arrays
             for(int i=0;i<n;i++)
@@ -25,33 +25,29 @@ TSP_SA::TSP_SA(vector<vector<double>> edge)
 			
 		}
 
-double TSP_SA:: getPathCost(vector<int> path)
+double TSP_SA:: pathCost(vector<int> path)
 		{
-			double cost = 0;
+			double total = 0;
 			for(int i = 0;i < n;i++)
 			{
-				cost += edge[path[i]][path[(i+1)%n]];
+				total += edge[path[i]][path[(i+1)%n]];
 			}
-			return cost;
+			return total;
 		}
 
     
-void TSP_SA::twoEdgeExchange(int a, int b, vector<int>& path_new)
+void TSP_SA::edgeExchange(int a, int b, vector<int>& path_new)
 		{
 			if(a > b)
 			{
-				twoEdgeExchange(b,a,path_new);
+				edgeExchange(b,a,path_new);
 			}
 			//reverse the substring
 			while(a<b)
-			{
-				swap(path_new[a],path_new[b]);
-				a++;
-				b--;
-			}
+				swap(path_new[a++],path_new[b--]);
 		}
 
-void TSP_SA::begin()
+void TSP_SA::runner()
 		{
 			srand((unsigned int)time(NULL));
 			int counter = 0;
@@ -62,47 +58,44 @@ void TSP_SA::begin()
 				
 				while(--iterator)
 				{
+					for(int i=1;i<n;i++)
+						path_new[i]=path_current[i];
 					int node1 = (rand()%(n-1))+1;
 					int node2 = (rand()%(n-1))+1;
-                    for(int i=1;i<n;i++)
-						path_new[i]=path_current[i];
-                    double r = (double) (rand()/ (double) RAND_MAX);
-					twoEdgeExchange(node1, node2, path_new);
-					double delta_E = getPathCost(path_new) - getPathCost(path_current);
-					double p = 1/(1+ pow(M_E, (delta_E/T)));
-					if(p > r)
+                    double random_prob = (double) (rand()/ (double) RAND_MAX);
+					edgeExchange(node1, node2, path_new);
+					double delta_cost_diff = pathCost(path_new) - pathCost(path_current);
+					double prob = 1/(1+ pow(M_E, (delta_cost_diff/T)));
+					if(prob > random_prob)
 						{for(int i=1;i<n;i++)
 							path_current[i]=path_new[i];
                         }
-				    double cost_new=getPathCost(path_new);
-                    double cost_best=getPathCost(path_best);
+				    double cost_new=pathCost(path_new);
+                    double cost_best=pathCost(path_best);
 					
-					if(cost_new < cost_best)
+					if(cost_new >= cost_best)
+					  counter++;
+					else
 					{
 						//cout<<cost_best-cost_new<<endl;
                         counter = 0;
 						for(int i=1;i<n;i++)
 							path_best[i]=path_new[i];
 						printBestPath();
-						
 					}
-					else
-						counter++;
 					
 				}
-				//cout<<getPathCost(path_best)<<endl;
-				T *= T_UPDATE_FACTOR;
+				T *= Temperature_update_factor;
 				if(counter > 1000000)
 				{
 					T = k*10*n;
-					k += k;
-					if(T>INITIAL_T)
+					counter = 0 ;
+					k =2*k;
+					if(T>Initial_Temperature)
 					{
-						T = INITIAL_T;
+						T = Initial_Temperature;
 						k = 1;
 					}
-					counter = 0 ;
-					 //cout<<"\nchange T "<<T<<endl;
 				}
 			}
 		}
@@ -114,7 +107,7 @@ void TSP_SA::printBestPath()
 				cout<<"invlid path";
 				exit(-1);
 			}
-			cout<<"Path: "<<getPathCost(path_best)<<endl;
+			cout<<"Path: "<<pathCost(path_best)<<endl;
 			for(int i=0;i<n;i++)
 				cout<<path_best[i]+1<<" ";
 			cout<<endl;
@@ -122,9 +115,7 @@ void TSP_SA::printBestPath()
 
 bool TSP_SA::validate_path(vector<int> path)
 {
-	//if(path.size()!=n+1) return false;
 	vector<bool> found(n,false);
-	//if(path[0]!=path[n])return false;
 	for(int i=0;i<n;i++)
 		if(found[path[i]]) return false;
 		else found[path[i]]=true;

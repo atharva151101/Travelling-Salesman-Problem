@@ -20,7 +20,7 @@ istream &operator>>(istream & in, TspSolver & T)
     in>>T.n;
 
     for(int i=0;i<T.n;i++) {
-        double a ; cin>>a;
+        //double a ; cin>>a;
         double x, y;
         cin>>x>>y;
         T.cities.push_back(make_pair(x,y));
@@ -32,18 +32,18 @@ istream &operator>>(istream & in, TspSolver & T)
         for(int j=0;j<T.n;j++)
         {
             double distance;
-            distance=sqrt(pow(T.cities[i].first-T.cities[j].first,2)+ pow(T.cities[i].second-T.cities[j].second,2)); 
+         //   distance=sqrt(pow(T.cities[i].first-T.cities[j].first,2)+ pow(T.cities[i].second-T.cities[j].second,2)); 
             //cout<<distance<<" ";
-    //        cin>>distance;
+            cin>>distance;
             row.push_back(distance);
         }
         T.graph.push_back(row);
         //cout<<endl;
     }
     
-    vector<int> opt(T.n);
-    for(int i=0;i<T.n;i++){cin>>opt[i];opt[i]--;}
-    cout<<T.calculate_distance(opt)<<endl;
+    //vector<int> opt(T.n);
+    //for(int i=0;i<T.n;i++){cin>>opt[i];opt[i]--;}
+    //cout<<T.calculate_distance(opt)<<endl;
     
     vector<int> random_tour;
     for(int i=0;i<T.n;i++) {
@@ -82,7 +82,7 @@ void TspSolver::solve_tsp_sa(){
 
         
         TSP_SA TSP_runner(graph);
-        TSP_runner.begin();
+        TSP_runner.runner();
         
 }
 

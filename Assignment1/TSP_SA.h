@@ -4,8 +4,8 @@
 #include <limits>
 #include<utility>
 #include<vector>
-#define INITIAL_T 999999999999999
-#define T_UPDATE_FACTOR 0.999
+#define Initial_Temperature 999999999999999
+#define Temperature_update_factor 0.999
 
 using namespace std;
 
@@ -19,9 +19,9 @@ class TSP_SA
 
 	public:
 		TSP_SA(vector<vector<double>> edge);
-		void twoEdgeExchange(int a, int b, vector<int>& path_new);
-		void begin();
+		void edgeExchange(int a, int b, vector<int>& path_new);
+		void runner();
 		void printBestPath();
-		double getPathCost(vector<int> path);
+		double pathCost(vector<int> path);
 		bool validate_path(vector<int> path);
 };
